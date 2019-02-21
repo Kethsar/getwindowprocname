@@ -31,3 +31,7 @@ func getProcessName() string {
 
 	return proc.GetName()
 }
+
+func startServer() {
+	log.Fatalln("Server mode is for Windows only.")
+}

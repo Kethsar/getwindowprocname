@@ -24,7 +24,8 @@ func main() {
 	}
 
 	if c.ServerMode {
-		log.Println("Running in server mode (not yet implemented)")
+		log.Println("Running in server mode")
+		startServer()
 	} else {
 		fmt.Printf(getProcessName())
 	}
