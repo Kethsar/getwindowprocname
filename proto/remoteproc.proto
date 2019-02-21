@@ -1,0 +1,12 @@
+syntax = "proto3";
+
+package remoteproc;
+
+service RemoteProc {
+    rpc GetProcName(Empty) returns (Process) {}
+}
+
+message Empty {}
+message Process {
+    string name = 1;
+}

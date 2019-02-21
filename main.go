@@ -1,8 +1,6 @@
 package main
 
-import (
-	"log"
-)
+import "fmt"
 
 type Config struct {
 	Port          string
@@ -11,5 +9,5 @@ type Config struct {
 }
 
 func main() {
-	log.Println(getProcessName())
+	fmt.Printf(getProcessName())
 }
