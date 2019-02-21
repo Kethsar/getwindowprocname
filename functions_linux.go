@@ -11,7 +11,11 @@ import (
 )
 
 func getProcessName() string {
-	conn, err := grpc.Dial("192.168.1.10:9001", grpc.WithInsecure())
+	if len(c.ServerAddress) < 1 {
+		log.Fatalln("Server address not found in config. It is needed to run the client on Linux.")
+	}
+
+	conn, err := grpc.Dial(c.ServerAddress, grpc.WithInsecure())
 	if err != nil {
 		log.Fatalln(err)
 	}
