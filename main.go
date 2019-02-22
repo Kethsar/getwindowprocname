@@ -13,7 +13,7 @@ type config struct {
 	ServerMode    bool
 }
 
-var c *config
+var c = new(config)
 
 func main() {
 	err := awconf.LoadConfig("getwindowprocname", &c)
