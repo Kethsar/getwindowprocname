@@ -10,7 +10,7 @@ This is only really meant to be used with [LookingGlass](https://github.com/gnif
 
 ## TODO
 - [x] Actually get the process name, strip the extension, and remove white space.
-- [ ] Add grpc code.
-  - [ ] server
-  - [ ] client
-- [ ] Add TOML config
+- [x] Add grpc code.
+  - [x] server
+  - [x] client
+- [x] Add TOML config

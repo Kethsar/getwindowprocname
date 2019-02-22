@@ -3,17 +3,48 @@
 package main
 
 import (
+	"context"
 	"log"
+	"net"
 	"regexp"
 	"strings"
 
+	pb "github.com/Kethsar/getwindowprocname/proto"
+	"google.golang.org/grpc"
+
 	"github.com/Kethsar/w32"
 )
+
+type remoteProcServer struct{}
 
 var (
 	windows   []w32.HWND // For storing the window handles from a call to w32.EnumWindows()
 	procRegex = regexp.MustCompile(`\\([^\\]+)$`)
 )
+
+func (s *remoteProcServer) GetProcName(ctx context.Context, e *pb.Empty) (*pb.Process, error) {
+	procName := getProcessName()
+	return &pb.Process{Name: procName}, nil
+}
+
+func startServer() {
+	if len(c.Port) < 2 { // colon and number
+		log.Fatalln("Port in config either too short or missing")
+	}
+
+	lis, err := net.Listen("tcp", c.Port)
+	if err != nil {
+		log.Fatalln("Failed to listen:", err)
+	}
+
+	s := grpc.NewServer()
+	pb.RegisterRemoteProcServer(s, &remoteProcServer{})
+
+	err = s.Serve(lis)
+	if err != nil {
+		log.Println(err)
+	}
+}
 
 func getProcessName() string {
 	procName := ""

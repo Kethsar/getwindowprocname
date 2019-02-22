@@ -13,10 +13,10 @@ type config struct {
 	ServerMode    bool
 }
 
-var c config
+var c *config
 
 func main() {
-	err := awconf.LoadConfig("getwindowprocname", c)
+	err := awconf.LoadConfig("getwindowprocname", &c)
 	if err != nil {
 		log.Println(err)
 		log.Println("Running in client mode")
