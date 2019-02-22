@@ -15,11 +15,12 @@ import (
 	"github.com/Kethsar/w32"
 )
 
+// dummy struct to implement the grpc server
 type remoteProcServer struct{}
 
 var (
-	windows   []w32.HWND // For storing the window handles from a call to w32.EnumWindows()
-	procRegex = regexp.MustCompile(`\\([^\\]+)$`)
+	windows   []w32.HWND                          // For storing the window handles from a call to w32.EnumWindows()
+	procRegex = regexp.MustCompile(`\\([^\\]+)$`) // To get the base process name
 )
 
 func (s *remoteProcServer) GetProcName(ctx context.Context, e *pb.Empty) (*pb.Process, error) {
@@ -46,16 +47,19 @@ func startServer() {
 	}
 }
 
+// Get the process name for the window current under the cursor
 func getProcessName() string {
 	procName := ""
 	x, y, ok := w32.GetCursorPos()
 	windows = make([]w32.HWND, 0, 10)
+	defer clearWindows() // Immediately clear the windows array after the function returns to prevent keeping them in memory unnecessarily
 
 	if !ok {
 		log.Println("Could not get cursor position")
 		return procName
 	}
 
+	// Enum all windows with enumProc as the callback
 	w32.EnumWindows(enumProc, 0)
 
 	// Whittle down the array of window handles to only valid windows
@@ -77,12 +81,14 @@ func getProcessName() string {
 			continue
 		}
 
+		// Get the process ID of the window, and attempt to open a handle to it
 		_, procID := w32.GetWindowThreadProcessId(h)
 		hProc, err := w32.OpenProcess(w32.PROCESS_QUERY_INFORMATION, false, uintptr(procID))
 		if err != nil {
 			continue
 		}
 
+		// Get the full process/program name, including path and extension
 		procName = w32.QueryFullProcessImageName(hProc)
 		w32.CloseHandle(hProc)
 
@@ -91,11 +97,13 @@ func getProcessName() string {
 		}
 	}
 
+	// check if we found a process
 	matches := procRegex.FindStringSubmatch(procName)
 	if len(matches) < 1 {
 		return procName
 	}
 
+	// Extract the process/program name and remove its extension
 	procName = matches[1]
 	extIndex := strings.LastIndex(procName, ".")
 	if extIndex > 0 { // If the only dot is the first character in the string, don't just blank the string
@@ -110,6 +118,7 @@ func enumProc(hwnd w32.HWND, lparam w32.LPARAM) w32.LRESULT {
 	return w32.LRESULT(1) // Something non-zero for true to continue enumeration
 }
 
+// Do the rectangle dimensions actually form a rectangle?
 func IsValidRect(r *w32.RECT) bool {
 	return (r.Bottom-r.Top) > 0 && (r.Right-r.Left) > 0
 }
@@ -132,6 +141,7 @@ func IsWindowCloaked(hwnd w32.HWND) bool {
 		(*(cloaked.(*w32.DWORD)) != 0)
 }
 
+// Check if the window has an actual window open that is displayable in some way
 func IsValidWindow(hwnd w32.HWND) bool {
 	rect := w32.GetWindowRect(hwnd)
 
@@ -144,4 +154,8 @@ func IsValidWindow(hwnd w32.HWND) bool {
 func CursorInRect(rect *w32.RECT, x, y int) bool {
 	return (y >= int(rect.Top) && y <= int(rect.Bottom)) &&
 		(x >= int(rect.Left) && x <= int(rect.Right))
+}
+
+func clearWindows() {
+	windows = nil
 }

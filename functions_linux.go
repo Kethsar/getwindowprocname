@@ -10,6 +10,7 @@ import (
 	"google.golang.org/grpc"
 )
 
+// Make a remote call to a Windows machine to get the process name for the window currently below the cursor
 func getProcessName() string {
 	if len(c.ServerAddress) < 1 {
 		log.Fatalln("Server address not found in config. It is needed to run the client on Linux.")
