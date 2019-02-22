@@ -21,7 +21,7 @@ func getProcessName() string {
 	}
 
 	client := pb.NewRemoteProcClient(conn)
-	ctx, cancel := context.WithTimeout(context.TODO(), 5*time.Second)
+	ctx, cancel := context.WithTimeout(context.TODO(), 1*time.Second)
 	defer cancel()
 
 	proc, err := client.GetProcName(ctx, &pb.Empty{})
