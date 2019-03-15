@@ -34,6 +34,6 @@ func main() {
 		log.Println("Running in server mode")
 		startServer()
 	} else {
-		fmt.Printf(getProcessName(*xPtr, *yPtr)) // Printing only this to stdout and everything else to stderr so the program can more easily be used in scripts
+		fmt.Println(getWindowInfo(*xPtr, *yPtr).GetProcName()) // Printing only this to stdout and everything else to stderr so the program can more easily be used in scripts
 	}
 }

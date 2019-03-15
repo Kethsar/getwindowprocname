@@ -23,9 +23,9 @@ var (
 	procRegex = regexp.MustCompile(`\\([^\\]+)$`) // To get the base process name
 )
 
-func (s *remoteProcServer) GetProcName(ctx context.Context, e *pb.Empty) (*pb.Process, error) {
-	procName := getProcessName()
-	return &pb.Process{Name: procName}, nil
+func (s *remoteProcServer) GetWindowInfo(ctx context.Context, cur *pb.Cursor) (*pb.WindowInfo, error) {
+	winfo := getWindowInfo(int(cur.GetX()), int(cur.GetY()))
+	return winfo, nil
 }
 
 func startServer() {
@@ -48,15 +48,21 @@ func startServer() {
 }
 
 // Get the process name for the window current under the cursor
-func getProcessName() string {
+func getWindowInfo(x, y int) *pb.WindowInfo {
 	procName := ""
-	x, y, ok := w32.GetCursorPos()
+	winfo := new(pb.WindowInfo)
 	windows = make([]w32.HWND, 0, 10)
 	defer clearWindows() // Immediately clear the windows array after the function returns to prevent keeping them in memory unnecessarily
 
-	if !ok {
-		log.Println("Could not get cursor position")
-		return procName
+	if x == -1 && y == -1 {
+		cx, cy, ok := w32.GetCursorPos()
+
+		if !ok {
+			log.Println("Could not get cursor position")
+			return winfo
+		}
+		x = cx
+		y = cy
 	}
 
 	// Enum all windows with enumProc as the callback
@@ -71,7 +77,7 @@ func getProcessName() string {
 	}
 
 	if len(validWindows) < 1 { // No real valid windows found, somehow
-		return procName
+		return winfo
 	}
 
 	for _, h := range validWindows {
@@ -93,6 +99,15 @@ func getProcessName() string {
 		w32.CloseHandle(hProc)
 
 		if procName != "" {
+			crect := w32.GetClientRect(h)
+			cleft, ctop := w32.ClientToScreen(h, 0, 0)
+			crect.Bottom += int32(ctop)
+			crect.Right += int32(cleft)
+
+			winfo.ClientRect.Left = int32(cleft)
+			winfo.ClientRect.Top = int32(ctop)
+			winfo.ClientRect.Bottom = crect.Bottom
+			winfo.ClientRect.Right = crect.Right
 			break
 		}
 	}
@@ -100,7 +115,7 @@ func getProcessName() string {
 	// check if we found a process
 	matches := procRegex.FindStringSubmatch(procName)
 	if len(matches) < 1 {
-		return procName
+		return winfo
 	}
 
 	// Extract the process/program name and remove its extension
@@ -110,7 +125,14 @@ func getProcessName() string {
 		procName = procName[:extIndex]
 	}
 
-	return procName
+	monWidth := w32.GetSystemMetrics(w32.SM_CXSCREEN)
+	monHeight := w32.GetSystemMetrics(w32.SM_CYSCREEN)
+
+	winfo.MonitorResolution.Width = int32(monWidth)
+	winfo.MonitorResolution.Height = int32(monHeight)
+	winfo.ProcName = procName
+
+	return winfo
 }
 
 func enumProc(hwnd w32.HWND, lparam w32.LPARAM) w32.LRESULT {
