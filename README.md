@@ -1,5 +1,5 @@
 # getwindowprocname
-Not actually usable yet haha
+~~Not actually usable yet haha~~ Usable but also does more than it was originally made for but >changing the name
 
 Gets the name of the process that spawned the top-level window under the mouse cursor, for Windows.
 
