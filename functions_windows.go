@@ -50,8 +50,11 @@ func startServer() {
 // Get the process name for the window current under the cursor
 func getWindowInfo(x, y int) *pb.WindowInfo {
 	procName := ""
-	winfo := new(pb.WindowInfo)
 	windows = make([]w32.HWND, 0, 10)
+	winfo := &pb.WindowInfo{
+		ClientRect:        &pb.Rect{},
+		MonitorResolution: &pb.Resolution{},
+	}
 	defer clearWindows() // Immediately clear the windows array after the function returns to prevent keeping them in memory unnecessarily
 
 	if x == -1 && y == -1 {
