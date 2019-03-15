@@ -13,7 +13,7 @@ import (
 )
 
 // Make a remote call to a Windows machine to get the process name for the window currently below the cursor
-func getProcessName(x, y int) string {
+func getWindowInfo(x, y int) *pb.WindowInfo {
 	if len(c.ServerAddress) < 1 {
 		log.Fatalln("Server address not found in config. It is needed to run the client on Linux.")
 	}
@@ -27,7 +27,7 @@ func getProcessName(x, y int) string {
 	ctx, cancel := context.WithTimeout(context.TODO(), 1*time.Second)
 	defer cancel()
 
-	winfo, err := client.GetProcName(ctx, &pb.Cursor{X: int32(x), Y: int32(y)})
+	winfo, err := client.GetWindowInfo(ctx, &pb.Cursor{X: int32(x), Y: int32(y)})
 	if err != nil {
 		log.Fatalln(err)
 	}
@@ -36,7 +36,7 @@ func getProcessName(x, y int) string {
 		writeWinInfoToFile(winfo)
 	}
 
-	return winfo.GetProcName()
+	return winfo
 }
 
 func writeWinInfoToFile(winfo *pb.WindowInfo) {

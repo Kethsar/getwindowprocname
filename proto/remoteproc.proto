@@ -3,7 +3,7 @@ syntax = "proto3";
 package remoteproc;
 
 service RemoteProc {
-    rpc GetProcName(Cursor) returns (WindowInfo) {}
+    rpc GetWindowInfo(Cursor) returns (WindowInfo) {}
 }
 
 message Cursor {
