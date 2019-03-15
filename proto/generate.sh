@@ -1,0 +1,1 @@
+protoc remoteproc.proto --go_out=plugins=grpc:.

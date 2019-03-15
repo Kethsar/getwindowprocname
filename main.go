@@ -1,6 +1,7 @@
 package main
 
 import (
+	"flag"
 	"fmt"
 	"log"
 
@@ -11,6 +12,8 @@ type config struct {
 	Port          string
 	ServerAddress string
 	ServerMode    bool
+	WriteToFile   bool
+	FileLocation  string
 }
 
 var c = new(config) // new to give us a pointer to a zero'd config so we don't accidentally null pointer like an idiot haha
@@ -23,10 +26,14 @@ func main() {
 		c.ServerMode = false
 	}
 
+	xPtr := flag.Int("x", -1, "Cursor X position to be sent to the server (client mode only)")
+	yPtr := flag.Int("y", -1, "Cursor Y position to be sent to the server (client mode only)")
+	flag.Parse()
+
 	if c.ServerMode {
 		log.Println("Running in server mode")
 		startServer()
 	} else {
-		fmt.Printf(getProcessName()) // Printing only this to stdout and everything else to stderr so the program can more easily be used in scripts
+		fmt.Printf(getProcessName(*xPtr, *yPtr)) // Printing only this to stdout and everything else to stderr so the program can more easily be used in scripts
 	}
 }

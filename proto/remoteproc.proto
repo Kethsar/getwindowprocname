@@ -3,10 +3,28 @@ syntax = "proto3";
 package remoteproc;
 
 service RemoteProc {
-    rpc GetProcName(Empty) returns (Process) {}
+    rpc GetProcName(Cursor) returns (WindowInfo) {}
 }
 
-message Empty {}
-message Process {
-    string name = 1;
+message Cursor {
+    int32 x = 1;
+    int32 y = 2;
+}
+
+message Rect {
+    int32 top = 1;
+    int32 left = 2;
+    int32 bottom = 3;
+    int32 right = 4;
+}
+
+message Resolution {
+    int32 width = 1;
+    int32 height = 2;
+}
+
+message WindowInfo {
+    string procName = 1;
+    Rect clientRect = 2;
+    Resolution monitorResolution = 3;
 }

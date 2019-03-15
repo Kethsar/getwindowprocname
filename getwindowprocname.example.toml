@@ -6,3 +6,10 @@ ServerAddress = "192.168.1.5:9002"
 
 # Run as a server?
 ServerMode = false
+
+# Write the returned data to a file in JSON format
+# Only for Client mode on linux
+WriteToFile = false
+
+# File to write info to if WriteToFile is true
+FileLocation = "/tmp/getwindowprocname.json"

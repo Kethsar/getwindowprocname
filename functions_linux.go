@@ -2,6 +2,8 @@ package main
 
 import (
 	"context"
+	"encoding/json"
+	"io/ioutil"
 	"log"
 	"time"
 
@@ -11,7 +13,7 @@ import (
 )
 
 // Make a remote call to a Windows machine to get the process name for the window currently below the cursor
-func getProcessName() string {
+func getProcessName(x, y int) string {
 	if len(c.ServerAddress) < 1 {
 		log.Fatalln("Server address not found in config. It is needed to run the client on Linux.")
 	}
@@ -25,12 +27,29 @@ func getProcessName() string {
 	ctx, cancel := context.WithTimeout(context.TODO(), 1*time.Second)
 	defer cancel()
 
-	proc, err := client.GetProcName(ctx, &pb.Empty{})
+	winfo, err := client.GetProcName(ctx, &pb.Cursor{X: int32(x), Y: int32(y)})
 	if err != nil {
 		log.Fatalln(err)
 	}
 
-	return proc.GetName()
+	if c.WriteToFile {
+		writeWinInfoToFile(winfo)
+	}
+
+	return winfo.GetProcName()
+}
+
+func writeWinInfoToFile(winfo *pb.WindowInfo) {
+	jsbytes, err := json.MarshalIndent(winfo, "", "\t")
+	if err != nil {
+		log.Println("Error converting data to JSON:", err)
+		return
+	}
+
+	err = ioutil.WriteFile(c.FileLocation, jsbytes, 0666)
+	if err != nil {
+		log.Println("Error writing json to tmp file:", err)
+	}
 }
 
 func startServer() {
