@@ -1,11 +1,13 @@
 package main
 
 import (
+	"bytes"
 	"context"
-	"encoding/json"
 	"io/ioutil"
 	"log"
 	"time"
+
+	"github.com/golang/protobuf/jsonpb"
 
 	pb "github.com/Kethsar/getwindowprocname/proto"
 
@@ -40,13 +42,19 @@ func getWindowInfo(x, y int) *pb.WindowInfo {
 }
 
 func writeWinInfoToFile(winfo *pb.WindowInfo) {
-	jsbytes, err := json.MarshalIndent(winfo, "", "\t")
+	marshaler := jsonpb.Marshaler{
+		EmitDefaults: true,
+		Indent:       "\t",
+	}
+
+	var jsbuf bytes.Buffer
+	err := marshaler.Marshal(&jsbuf, winfo)
 	if err != nil {
 		log.Println("Error converting data to JSON:", err)
 		return
 	}
 
-	err = ioutil.WriteFile(c.FileLocation, jsbytes, 0666)
+	err = ioutil.WriteFile(c.FileLocation, jsbuf.Bytes(), 0644)
 	if err != nil {
 		log.Println("Error writing json to tmp file:", err)
 	}

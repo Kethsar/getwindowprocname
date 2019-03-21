@@ -2,3 +2,5 @@
 *~
 getwindowprocname
 getwindowprocname.toml
+.vscode/
+debug
